@@ -150,6 +150,30 @@
   text-align: center;
 }
 
+.modeToggle {
+  display: inline-flex;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  background: color-mix(in srgb, var(--bg) 88%, var(--fg) 12%);
+}
+
+.toggleButton {
+  padding: 10px 14px;
+  font-weight: 700;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+}
+
+.toggleButtonActive {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--fg);
+  border-color: color-mix(in srgb, var(--fg) 18%, transparent);
+}
+
 .quizOptions {
   width: 100%;
   display: grid;
