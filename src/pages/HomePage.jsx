@@ -10,10 +10,32 @@ const CHORD_QUALITIES = /** @type {const} */ ([
   { id: 'diminished', label: 'Diminished', intervals: [0, 3, 6] },
 ])
 
-function buildChord(rootNote, intervals) {
-  // Tone.Frequency(note).transpose(semitones) returns a Frequency object
-  // which we convert back into a note string.
-  return intervals.map((semitones) => Tone.Frequency(rootNote).transpose(semitones).toNote())
+function buildChordInSameOctave(rootNote, intervals) {
+  // Build chord tones from semitone intervals, but "wrap" tones down so they
+  // stay within the *same octave number* as the root.
+  //
+  // Examples (root octave = 4):
+  // - C4 major: C4 E4 G4 (already octave 4)
+  // - A4 minor: A4 C5 E5  -> A4 C4 E4
+  // - F4 major: F4 A4 C5  -> F4 A4 C4
+
+  const rootOctave = Number(String(rootNote).match(/(-?\d+)$/)?.[1])
+  if (!Number.isFinite(rootOctave)) return intervals.map((s) => Tone.Frequency(rootNote).transpose(s).toNote())
+
+  return intervals.map((semitones) => {
+    let midi = Tone.Frequency(rootNote).transpose(semitones).toMidi()
+    // Convert to note to inspect octave. (Tone doesn't expose octave directly.)
+    let note = Tone.Frequency(midi, 'midi').toNote()
+    let noteOctave = Number(String(note).match(/(-?\d+)$/)?.[1])
+
+    while (Number.isFinite(noteOctave) && noteOctave > rootOctave) {
+      midi -= 12
+      note = Tone.Frequency(midi, 'midi').toNote()
+      noteOctave = Number(String(note).match(/(-?\d+)$/)?.[1])
+    }
+
+    return note
+  })
 }
 
 export default function HomePage() {
@@ -71,7 +93,7 @@ export default function HomePage() {
 
     const synth = getSynth()
     const rootNote = noteFromLetter(rootLetter)
-    const chordNotes = buildChord(rootNote, quality.intervals)
+    const chordNotes = buildChordInSameOctave(rootNote, quality.intervals)
 
     synth.triggerAttackRelease(chordNotes, '4n')
     setStatus(`Played ${rootNote} ${quality.label}: ${chordNotes.join(' ')}`)
