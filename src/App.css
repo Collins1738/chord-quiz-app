@@ -1,0 +1,184 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0;
+  font-size: 2.2rem;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+.panel {
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  border-radius: 12px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.hint {
+  margin: 14px 0 0;
+  color: var(--muted);
+}
+
+
+.controls {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.octaveControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  background: color-mix(in srgb, var(--bg) 88%, var(--fg) 12%);
+}
+
+.octaveLabel {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.octaveKnob {
+  width: 220px;
+}
+
+.octaveValue {
+  min-width: 1.8em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+
+.chordMatrix {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(44px, 1fr));
+  gap: 10px;
+}
+
+.noteButton {
+  padding: 12px 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  font-weight: 650;
+}
+
+.chordButton {
+  padding: 10px 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.chordButton:hover {
+  color: var(--fg);
+}
+
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.navLink {
+  align-self: center;
+  font-weight: 600;
+  color: var(--fg);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  background: color-mix(in srgb, var(--bg) 88%, var(--fg) 12%);
+}
+
+.navLink:hover {
+  border-color: #646cff;
+}
+
+.quizPanel {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+}
+
+.playButton {
+  padding: 14px 22px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.quizInner {
+  width: min(720px, 100%);
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.quizStatus {
+  color: var(--muted);
+  text-align: center;
+}
+
+.quizOptions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(44px, 1fr));
+  gap: 10px;
+}
+
+.optionButton {
+  padding: 12px 0;
+  font-weight: 650;
+}
+
+.optionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quizResult {
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  background: color-mix(in srgb, var(--bg) 85%, var(--fg) 15%);
+}
+
+.quizResult[data-correct='true'] {
+  border-color: color-mix(in srgb, #3ddc97 45%, transparent);
+}
+
+.quizResult[data-correct='false'] {
+  border-color: color-mix(in srgb, #ff5c5c 45%, transparent);
+}
