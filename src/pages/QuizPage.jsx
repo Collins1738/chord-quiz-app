@@ -2,53 +2,123 @@ import { Link } from 'react-router-dom'
 import { useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
 
-const QUIZ_CONFIG = {
+const KEY_LETTERS = /** @type {const} */ (['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+
+const MODE_INFO = {
   major: {
-    name: 'C Major',
+    modeName: 'Major',
     romanOptions: /** @type {const} */ (['I', 'ii', 'iii', 'IV', 'V', 'vi', 'viio']),
-    scaleNotes: /** @type {const} */ (['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5']),
-    triads: /** @type {const} */ ([
-      { roman: 'I', name: 'C', notes: ['C4', 'E4', 'G4'] },
-      { roman: 'ii', name: 'Dm', notes: ['D4', 'F4', 'A4'] },
-      { roman: 'iii', name: 'Em', notes: ['E4', 'G4', 'B4'] },
-      { roman: 'IV', name: 'F', notes: ['F4', 'A4', 'C4'] },
-      { roman: 'V', name: 'G', notes: ['G4', 'B4', 'D4'] },
-      { roman: 'vi', name: 'Am', notes: ['A4', 'C4', 'E4'] },
-      { roman: 'viio', name: 'Bdim', notes: ['B4', 'D4', 'F4'] },
-    ]),
+    // Semitones from tonic for a major scale (incl. octave)
+    scaleSemitones: /** @type {const} */ ([0, 2, 4, 5, 7, 9, 11, 12]),
+    triadQualities: /** @type {const} */ (['major', 'minor', 'minor', 'major', 'major', 'minor', 'diminished']),
   },
   minor: {
-    name: 'C Minor (natural)',
+    modeName: 'Minor (natural)',
     romanOptions: /** @type {const} */ (['i', 'iio', 'III', 'iv', 'v', 'VI', 'VII']),
-    scaleNotes: /** @type {const} */ (['C4', 'D4', 'Eb4', 'F4', 'G4', 'Ab4', 'Bb4', 'C5']),
-    triads: /** @type {const} */ ([
-      { roman: 'i', name: 'Cm', notes: ['C4', 'Eb4', 'G4'] },
-      { roman: 'iio', name: 'Ddim', notes: ['D4', 'F4', 'Ab4'] },
-      { roman: 'III', name: 'Eb', notes: ['Eb4', 'G4', 'Bb4'] },
-      { roman: 'iv', name: 'Fm', notes: ['F4', 'Ab4', 'C4'] },
-      { roman: 'v', name: 'Gm', notes: ['G4', 'Bb4', 'D4'] },
-      { roman: 'VI', name: 'Ab', notes: ['Ab4', 'C4', 'Eb4'] },
-      { roman: 'VII', name: 'Bb', notes: ['Bb4', 'D4', 'F4'] },
-    ]),
+    // Semitones from tonic for a natural minor scale (incl. octave)
+    scaleSemitones: /** @type {const} */ ([0, 2, 3, 5, 7, 8, 10, 12]),
+    triadQualities: /** @type {const} */ (['minor', 'diminished', 'major', 'minor', 'minor', 'major', 'major']),
   },
+}
+
+function pitchClassFromNote(note) {
+  // Tone note format: e.g. C#4, Eb3
+  return String(note).replace(/-?\d+$/, '')
+}
+
+function suffixForQuality(quality) {
+  if (quality === 'minor') return 'm'
+  if (quality === 'diminished') return 'dim'
+  return ''
+}
+
+function buildChordInSameOctave(rootNote, intervals) {
+  // Build chord tones from semitone intervals, but "wrap" tones down so they
+  // stay within the *same octave number* as the root.
+  const rootOctave = Number(String(rootNote).match(/(-?\d+)$/)?.[1])
+  if (!Number.isFinite(rootOctave)) return intervals.map((s) => Tone.Frequency(rootNote).transpose(s).toNote())
+
+  return intervals.map((semitones) => {
+    let midi = Tone.Frequency(rootNote).transpose(semitones).toMidi()
+    // Convert to note to inspect octave. (Tone doesn't expose octave directly.)
+    let note = Tone.Frequency(midi, 'midi').toNote()
+    let noteOctave = Number(String(note).match(/(-?\d+)$/)?.[1])
+
+    while (Number.isFinite(noteOctave) && noteOctave > rootOctave) {
+      midi -= 12
+      note = Tone.Frequency(midi, 'midi').toNote()
+      noteOctave = Number(String(note).match(/(-?\d+)$/)?.[1])
+    }
+
+    return note
+  })
+}
+
+function buildQuizConfig(keyLetter, mode) {
+  const modeInfo = MODE_INFO[mode]
+  const tonic = `${keyLetter}4`
+
+  const scaleNotes = modeInfo.scaleSemitones.map((s) => Tone.Frequency(tonic).transpose(s).toNote())
+
+  const degreeSemitones = modeInfo.scaleSemitones.slice(0, 7)
+
+  const triads = degreeSemitones.map((rootAbs, degree) => {
+    const thirdDegree = degree + 2
+    const fifthDegree = degree + 4
+
+    const thirdAbs = degreeSemitones[thirdDegree % 7] + (thirdDegree >= 7 ? 12 : 0)
+    const fifthAbs = degreeSemitones[fifthDegree % 7] + (fifthDegree >= 7 ? 12 : 0)
+
+    const thirdInterval = thirdAbs - rootAbs
+    const fifthInterval = fifthAbs - rootAbs
+
+    const rootNote = Tone.Frequency(tonic).transpose(rootAbs).toNote()
+    const chordNotes = buildChordInSameOctave(rootNote, [0, thirdInterval, fifthInterval])
+
+    const quality = modeInfo.triadQualities[degree]
+    const chordName = `${pitchClassFromNote(rootNote)}${suffixForQuality(quality)}`
+
+    return {
+      roman: modeInfo.romanOptions[degree],
+      name: chordName,
+      notes: chordNotes,
+    }
+  })
+
+  return {
+    name: `${keyLetter} ${modeInfo.modeName}`,
+    romanOptions: modeInfo.romanOptions,
+    scaleNotes,
+    triads,
+  }
 }
 
 export default function QuizPage() {
   const synthRef = useRef(null)
   const [audioReady, setAudioReady] = useState(false)
+  const [keyLetter, setKeyLetter] = useState('C')
   const [mode, setMode] = useState('major')
   const [status, setStatus] = useState('Press play to begin')
   const [isPlaying, setIsPlaying] = useState(false)
   const [answer, setAnswer] = useState(null)
   const [result, setResult] = useState(null)
 
-  const config = QUIZ_CONFIG[mode]
+  const config = useMemo(() => buildQuizConfig(keyLetter, mode), [keyLetter, mode])
 
   const triadsByRoman = useMemo(() => {
     const map = {}
     for (const triad of config.triads) map[triad.roman] = triad
     return map
   }, [config.triads])
+
+  function resetQuizState(nextMode, nextKeyLetter) {
+    if (typeof nextMode === 'string') setMode(nextMode)
+    if (typeof nextKeyLetter === 'string') setKeyLetter(nextKeyLetter)
+
+    setAnswer(null)
+    setResult(null)
+    setStatus('Press play to begin')
+  }
 
   function getSynth() {
     if (synthRef.current) return synthRef.current
@@ -95,7 +165,7 @@ export default function QuizPage() {
 
     const synth = getSynth()
 
-    // 1) Play the scale up (C major) in order
+    // 1) Play the scale up in order
     const start = Tone.now() + 0.05
     const noteDur = 0.18
     const gap = 0.02
@@ -111,7 +181,7 @@ export default function QuizPage() {
     synth.triggerAttackRelease(triad.notes, chordDur, afterScale)
 
     // Let the audio finish before enabling answers
-    const totalTime = (afterScale - start) + chordDur + 0.35
+    const totalTime = afterScale - start + chordDur + 0.35
 
     window.setTimeout(() => {
       setIsPlaying(false)
@@ -140,7 +210,7 @@ export default function QuizPage() {
         <div className="headerRow">
           <div>
             <h1 className="title">Quiz</h1>
-            <p className="subtitle">Scale: {config.name} (hard-coded for now)</p>
+            <p className="subtitle">Scale: {config.name}</p>
           </div>
 
           <Link className="navLink" to="/">
@@ -155,33 +225,42 @@ export default function QuizPage() {
             {status}
           </div>
 
-          <div className="modeToggle" role="group" aria-label="Select quiz mode">
-            <button
-              type="button"
-              className={mode === 'major' ? 'toggleButton toggleButtonActive' : 'toggleButton'}
-              onClick={() => {
-                setMode('major')
-                setAnswer(null)
-                setResult(null)
-                setStatus('Press play to begin')
-              }}
-              disabled={isPlaying}
-            >
-              Major
-            </button>
-            <button
-              type="button"
-              className={mode === 'minor' ? 'toggleButton toggleButtonActive' : 'toggleButton'}
-              onClick={() => {
-                setMode('minor')
-                setAnswer(null)
-                setResult(null)
-                setStatus('Press play to begin')
-              }}
-              disabled={isPlaying}
-            >
-              Minor
-            </button>
+          <div className="quizControls" aria-label="Quiz controls">
+            <label className="keyControl">
+              <span className="keyLabel">Key</span>
+              <select
+                className="keySelect"
+                value={keyLetter}
+                onChange={(e) => resetQuizState(null, e.target.value)}
+                disabled={isPlaying}
+                aria-label="Select key"
+              >
+                {KEY_LETTERS.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="modeToggle" role="group" aria-label="Select quiz mode">
+              <button
+                type="button"
+                className={mode === 'major' ? 'toggleButton toggleButtonActive' : 'toggleButton'}
+                onClick={() => resetQuizState('major', null)}
+                disabled={isPlaying}
+              >
+                Major
+              </button>
+              <button
+                type="button"
+                className={mode === 'minor' ? 'toggleButton toggleButtonActive' : 'toggleButton'}
+                onClick={() => resetQuizState('minor', null)}
+                disabled={isPlaying}
+              >
+                Minor
+              </button>
+            </div>
           </div>
 
           <button type="button" className="playButton" onClick={handlePlay} disabled={isPlaying}>
