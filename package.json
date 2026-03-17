@@ -1,6 +1,5 @@
 {
   "name": "chord-quiz-app",
-  "homepage": "https://collins.lol/#/chord-quiz-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
