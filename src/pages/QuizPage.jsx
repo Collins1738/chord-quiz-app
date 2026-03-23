@@ -311,17 +311,6 @@ export default function QuizPage() {
             ))}
           </div>
 
-          {(streak > 0 || bestStreak > 0) && (
-            <div className="streakDisplay">
-              <span className="streakCurrent">
-                🔥 {streak} in a row
-              </span>
-              {bestStreak > streak && (
-                <span className="streakBest">Best: {bestStreak}</span>
-              )}
-            </div>
-          )}
-
           {result ? (
             <div className="quizResult" data-correct={result.correct ? 'true' : 'false'}>
               <div>
@@ -332,6 +321,17 @@ export default function QuizPage() {
               </div>
             </div>
           ) : null}
+
+          {(streak > 0 || bestStreak > 0) && (
+            <div className="streakDisplay">
+              <span className="streakCurrent">
+                🔥 {streak} in a row
+              </span>
+              {bestStreak > streak && (
+                <span className="streakBest">Best: {bestStreak}</span>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </main>
