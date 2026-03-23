@@ -95,6 +95,7 @@ function buildQuizConfig(keyLetter, mode) {
 
 export default function QuizPage() {
   const synthRef = useRef(null)
+  const currentTriadRef = useRef(null)
   const [audioReady, setAudioReady] = useState(false)
   const [keyLetter, setKeyLetter] = useState('C')
   const [mode, setMode] = useState('major')
@@ -115,6 +116,7 @@ export default function QuizPage() {
     if (typeof nextMode === 'string') setMode(nextMode)
     if (typeof nextKeyLetter === 'string') setKeyLetter(nextKeyLetter)
 
+    currentTriadRef.current = null
     setAnswer(null)
     setResult(null)
     setStatus('Press play to begin')
@@ -150,43 +152,54 @@ export default function QuizPage() {
     return Math.floor(Math.random() * maxExclusive)
   }
 
-  async function handlePlay() {
-    if (isPlaying) return
-
+  async function playChord(triad, { withScale }) {
     const ok = await ensureAudioStarted()
     if (!ok) return
 
     setIsPlaying(true)
-    setResult(null)
-
-    const triad = config.triads[randInt(config.triads.length)]
-    setAnswer(triad.roman)
-    setStatus(`Scale: ${config.name}. Listen…`)
 
     const synth = getSynth()
-
-    // 1) Play the scale up in order
     const start = Tone.now() + 0.05
     const noteDur = 0.18
     const gap = 0.02
 
-    config.scaleNotes.forEach((note, i) => {
-      const t = start + i * (noteDur + gap)
-      synth.triggerAttackRelease(note, noteDur, t)
-    })
+    let chordStart = start
 
-    // 2) Then play a random diatonic triad as a chord
-    const afterScale = start + config.scaleNotes.length * (noteDur + gap) + 0.25
+    if (withScale) {
+      setStatus(`Scale: ${config.name}. Listen…`)
+      config.scaleNotes.forEach((note, i) => {
+        const t = start + i * (noteDur + gap)
+        synth.triggerAttackRelease(note, noteDur, t)
+      })
+      chordStart = start + config.scaleNotes.length * (noteDur + gap) + 0.25
+    } else {
+      setStatus('Listen again…')
+    }
+
     const chordDur = 0.9
-    synth.triggerAttackRelease(triad.notes, chordDur, afterScale)
+    synth.triggerAttackRelease(triad.notes, chordDur, chordStart)
 
-    // Let the audio finish before enabling answers
-    const totalTime = afterScale - start + chordDur + 0.35
-
+    const totalTime = chordStart - start + chordDur + 0.35
     window.setTimeout(() => {
       setIsPlaying(false)
       setStatus('Which chord degree was that?')
     }, totalTime * 1000)
+  }
+
+  async function handlePlay() {
+    if (isPlaying) return
+
+    const triad = config.triads[randInt(config.triads.length)]
+    currentTriadRef.current = triad
+    setAnswer(triad.roman)
+    setResult(null)
+
+    await playChord(triad, { withScale: true })
+  }
+
+  async function handleReplay() {
+    if (isPlaying || !currentTriadRef.current) return
+    await playChord(currentTriadRef.current, { withScale: false })
   }
 
   function handleGuess(roman) {
@@ -263,9 +276,15 @@ export default function QuizPage() {
             </div>
           </div>
 
-          <button type="button" className="playButton" onClick={handlePlay} disabled={isPlaying}>
-            {isPlaying ? 'Playing…' : 'Play'}
-          </button>
+          {answer && !result ? (
+            <button type="button" className="playButton" onClick={handleReplay} disabled={isPlaying}>
+              {isPlaying ? 'Playing…' : '🔁 Replay'}
+            </button>
+          ) : (
+            <button type="button" className="playButton" onClick={handlePlay} disabled={isPlaying}>
+              {isPlaying ? 'Playing…' : result ? 'Play Next' : 'Play'}
+            </button>
+          )}
 
           <div className="quizOptions" role="group" aria-label="Chord degree options">
             {config.romanOptions.map((roman) => (
