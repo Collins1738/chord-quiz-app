@@ -225,7 +225,7 @@ export default function QuizPage() {
     } else {
       setStreak(0)
     }
-    setStatus(correct ? 'Correct!' : 'Not quite — try again, or press Play for a new one')
+    setStatus(correct ? 'Correct!' : 'Not quite — try again')
   }
 
   return (
@@ -248,17 +248,6 @@ export default function QuizPage() {
           <div className="quizStatus" role="status" aria-live="polite">
             {status}
           </div>
-
-          {(streak > 0 || bestStreak > 0) && (
-            <div className="streakDisplay">
-              <span className="streakCurrent">
-                🔥 {streak} in a row
-              </span>
-              {bestStreak > streak && (
-                <span className="streakBest">Best: {bestStreak}</span>
-              )}
-            </div>
-          )}
 
           <div className="quizControls" aria-label="Quiz controls">
             <label className="keyControl">
@@ -321,6 +310,17 @@ export default function QuizPage() {
               </button>
             ))}
           </div>
+
+          {(streak > 0 || bestStreak > 0) && (
+            <div className="streakDisplay">
+              <span className="streakCurrent">
+                🔥 {streak} in a row
+              </span>
+              {bestStreak > streak && (
+                <span className="streakBest">Best: {bestStreak}</span>
+              )}
+            </div>
+          )}
 
           {result ? (
             <div className="quizResult" data-correct={result.correct ? 'true' : 'false'}>
