@@ -116,14 +116,27 @@
     text-align: center;
   }
 
-  .noteButton, .optionButton {
+  .noteButton {
+    font-size: 0.75rem;
+    padding: 9px 0;
+  }
+
+  .optionButton {
     font-size: 0.9rem;
     padding: 10px 0;
   }
 
   .chordButton {
-    font-size: 0.8rem;
-    padding: 8px 0;
+    font-size: 0.65rem;
+    padding: 7px 0;
+  }
+
+  .chordButtonLabel {
+    display: none !important;
+  }
+
+  .chordButtonShort {
+    display: inline !important;
   }
 }
 
@@ -153,8 +166,8 @@
 
 @media (max-width: 600px) {
   .chordMatrix {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 5px;
   }
 }
 
@@ -173,6 +186,16 @@
 
 .chordButton:hover {
   color: var(--fg);
+}
+
+/* Short label hidden by default; shown on mobile */
+.chordButtonShort {
+  display: none;
+}
+
+/* Full label shown by default; hidden on mobile */
+.chordButtonLabel {
+  display: inline;
 }
 
 
