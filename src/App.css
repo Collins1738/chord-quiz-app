@@ -129,15 +129,14 @@
   .chordButton {
     font-size: 0.65rem;
     padding: 7px 0;
-    overflow: hidden;
   }
 
   .chordButtonLabel {
-    display: none;
+    display: none !important;
   }
 
   .chordButtonShort {
-    display: inline;
+    display: inline !important;
   }
 }
 
@@ -189,8 +188,14 @@
   color: var(--fg);
 }
 
+/* Short label hidden by default; shown on mobile */
 .chordButtonShort {
   display: none;
+}
+
+/* Full label shown by default; hidden on mobile */
+.chordButtonLabel {
+  display: inline;
 }
 
 
