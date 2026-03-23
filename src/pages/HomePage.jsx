@@ -5,9 +5,9 @@ import * as Tone from 'tone'
 const ROOT_LETTERS = /** @type {const} */ (['C', 'D', 'E', 'F', 'G', 'A', 'B'])
 
 const CHORD_QUALITIES = /** @type {const} */ ([
-  { id: 'major', label: 'Major', intervals: [0, 4, 7] },
-  { id: 'minor', label: 'Minor', intervals: [0, 3, 7] },
-  { id: 'diminished', label: 'Diminished', intervals: [0, 3, 6] },
+  { id: 'major', label: 'Major', shortLabel: 'maj', intervals: [0, 4, 7] },
+  { id: 'minor', label: 'Minor', shortLabel: 'min', intervals: [0, 3, 7] },
+  { id: 'diminished', label: 'Diminished', shortLabel: 'dim', intervals: [0, 3, 6] },
 ])
 
 function buildChordInSameOctave(rootNote, intervals) {
@@ -169,10 +169,12 @@ export default function HomePage() {
                 key={`${quality.id}:${letter}`}
                 type="button"
                 className="chordButton"
+                data-short={quality.shortLabel}
                 onClick={() => handlePlayChord(letter, quality)}
                 title={`Play ${noteFromLetter(letter)} ${quality.label}`}
               >
-                {quality.label.toLowerCase()}
+                <span className="chordButtonLabel">{quality.label.toLowerCase()}</span>
+                <span className="chordButtonShort">{quality.shortLabel}</span>
               </button>
             ))
           )}
