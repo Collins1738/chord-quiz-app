@@ -103,6 +103,8 @@ export default function QuizPage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [answer, setAnswer] = useState(null)
   const [result, setResult] = useState(null)
+  const [streak, setStreak] = useState(0)
+  const [bestStreak, setBestStreak] = useState(0)
 
   const config = useMemo(() => buildQuizConfig(keyLetter, mode), [keyLetter, mode])
 
@@ -119,6 +121,8 @@ export default function QuizPage() {
     currentTriadRef.current = null
     setAnswer(null)
     setResult(null)
+    setStreak(0)
+    setBestStreak(0)
     setStatus('Press play to begin')
   }
 
@@ -212,7 +216,16 @@ export default function QuizPage() {
       answer,
       details: triad ? `${triad.roman} (${triad.name})` : answer,
     })
-    setStatus(correct ? 'Correct!' : 'Not quite — try again, or press Play for a new one')
+    if (correct) {
+      setStreak((prev) => {
+        const next = prev + 1
+        setBestStreak((best) => Math.max(best, next))
+        return next
+      })
+    } else {
+      setStreak(0)
+    }
+    setStatus(correct ? 'Correct!' : 'Not quite — try again')
   }
 
   return (
@@ -308,6 +321,17 @@ export default function QuizPage() {
               </div>
             </div>
           ) : null}
+
+          {(streak > 0 || bestStreak > 0) && (
+            <div className="streakDisplay">
+              <span className="streakCurrent">
+                🔥 {streak} in a row
+              </span>
+              {bestStreak > streak && (
+                <span className="streakBest">Best: {bestStreak}</span>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </main>

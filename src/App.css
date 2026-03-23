@@ -348,3 +348,25 @@
 .quizResult[data-correct='false'] {
   border-color: color-mix(in srgb, #ff5c5c 45%, transparent);
 }
+
+.streakDisplay {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, #ff9500 40%, transparent);
+  background: color-mix(in srgb, #ff9500 10%, transparent);
+}
+
+.streakCurrent {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.streakBest {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+}
