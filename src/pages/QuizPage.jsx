@@ -103,6 +103,7 @@ export default function QuizPage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [answer, setAnswer] = useState(null)
   const [result, setResult] = useState(null)
+  const [scaleIsPlaying, setScaleIsPlaying] = useState(false)
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
 
@@ -123,6 +124,7 @@ export default function QuizPage() {
     setResult(null)
     setStreak(0)
     setBestStreak(0)
+    setScaleIsPlaying(false)
     setStatus('Press play to begin')
   }
 
@@ -166,6 +168,7 @@ export default function QuizPage() {
     const gap = 0.02
 
     // Always play scale then chord
+    setScaleIsPlaying(true)
     setStatus(`Scale: ${config.name}. Listen…`)
     config.scaleNotes.forEach((note, i) => {
       const t = start + i * (noteDur + gap)
@@ -176,10 +179,15 @@ export default function QuizPage() {
     const chordDur = 0.9
     synth.triggerAttackRelease(triad.notes, chordDur, chordStart)
 
+    // Re-enable chord buttons once scale finishes and chord begins
+    window.setTimeout(() => {
+      setScaleIsPlaying(false)
+      setStatus('Which chord degree was that?')
+    }, (chordStart - start) * 1000)
+
     const totalTime = chordStart - start + chordDur + 0.35
     window.setTimeout(() => {
       setIsPlaying(false)
-      setStatus('Which chord degree was that?')
     }, totalTime * 1000)
   }
 
@@ -206,7 +214,7 @@ export default function QuizPage() {
 
   function handleGuess(roman) {
     if (!answer) return
-    if (isPlaying) return
+    if (scaleIsPlaying) return
 
     const correct = roman === answer
     const triad = triadsByRoman[answer]
@@ -304,7 +312,7 @@ export default function QuizPage() {
                 type="button"
                 className="optionButton"
                 onClick={() => handleGuess(roman)}
-                disabled={!answer || isPlaying}
+                disabled={!answer || scaleIsPlaying}
               >
                 {roman}
               </button>
