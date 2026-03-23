@@ -152,30 +152,23 @@ export default function QuizPage() {
     return Math.floor(Math.random() * maxExclusive)
   }
 
-  async function playChord(triad, { withScale }) {
+  async function playSequence(triad) {
     const ok = await ensureAudioStarted()
     if (!ok) return
-
-    setIsPlaying(true)
 
     const synth = getSynth()
     const start = Tone.now() + 0.05
     const noteDur = 0.18
     const gap = 0.02
 
-    let chordStart = start
+    // Always play scale then chord
+    setStatus(`Scale: ${config.name}. Listen…`)
+    config.scaleNotes.forEach((note, i) => {
+      const t = start + i * (noteDur + gap)
+      synth.triggerAttackRelease(note, noteDur, t)
+    })
 
-    if (withScale) {
-      setStatus(`Scale: ${config.name}. Listen…`)
-      config.scaleNotes.forEach((note, i) => {
-        const t = start + i * (noteDur + gap)
-        synth.triggerAttackRelease(note, noteDur, t)
-      })
-      chordStart = start + config.scaleNotes.length * (noteDur + gap) + 0.25
-    } else {
-      setStatus('Listen again…')
-    }
-
+    const chordStart = start + config.scaleNotes.length * (noteDur + gap) + 0.25
     const chordDur = 0.9
     synth.triggerAttackRelease(triad.notes, chordDur, chordStart)
 
@@ -186,20 +179,25 @@ export default function QuizPage() {
     }, totalTime * 1000)
   }
 
-  async function handlePlay() {
+  function handlePlay() {
     if (isPlaying) return
 
     const triad = config.triads[randInt(config.triads.length)]
     currentTriadRef.current = triad
+
+    // Set isPlaying synchronously before any async work to prevent flicker
+    setIsPlaying(true)
     setAnswer(triad.roman)
     setResult(null)
 
-    await playChord(triad, { withScale: true })
+    playSequence(triad)
   }
 
-  async function handleReplay() {
+  function handleReplay() {
     if (isPlaying || !currentTriadRef.current) return
-    await playChord(currentTriadRef.current, { withScale: false })
+
+    setIsPlaying(true)
+    playSequence(currentTriadRef.current)
   }
 
   function handleGuess(roman) {
