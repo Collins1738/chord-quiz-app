@@ -62,6 +62,69 @@
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
   background: color-mix(in srgb, var(--bg) 88%, var(--fg) 12%);
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 24px 14px;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .octaveControl {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .octaveKnob {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+
+  .quizControls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .keyControl {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+  }
+
+  .keySelect {
+    flex: 1;
+  }
+
+  .modeToggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toggleButton {
+    flex: 1;
+    text-align: center;
+  }
+
+  .noteButton, .optionButton {
+    font-size: 0.9rem;
+    padding: 10px 0;
+  }
+
+  .chordButton {
+    font-size: 0.8rem;
+    padding: 8px 0;
+  }
 }
 
 .octaveLabel {
@@ -71,6 +134,7 @@
 
 .octaveKnob {
   width: 220px;
+  max-width: 100%;
 }
 
 .octaveValue {
@@ -85,6 +149,13 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(44px, 1fr));
   gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .chordMatrix {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
 }
 
 .noteButton {
@@ -110,6 +181,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .navLink {
@@ -219,6 +291,13 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(44px, 1fr));
   gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .quizOptions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
 }
 
 .optionButton {
