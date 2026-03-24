@@ -212,6 +212,18 @@ export default function QuizPage() {
     playSequence(currentTriadRef.current)
   }
 
+  async function playChordPreview(roman) {
+    const triad = triadsByRoman[roman]
+    if (!triad) return
+
+    const ok = await ensureAudioStarted()
+    if (!ok) return
+
+    const synth = getSynth()
+    const start = Tone.now() + 0.05
+    synth.triggerAttackRelease(triad.notes, 0.9, start)
+  }
+
   function handleGuess(roman) {
     if (!answer) return
     if (scaleIsPlaying) return
@@ -311,7 +323,7 @@ export default function QuizPage() {
                 key={roman}
                 type="button"
                 className="optionButton"
-                onClick={() => handleGuess(roman)}
+                onClick={() => result ? playChordPreview(roman) : handleGuess(roman)}
                 disabled={!answer || scaleIsPlaying}
               >
                 {roman}
