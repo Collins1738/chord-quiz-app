@@ -41,13 +41,13 @@ npm run preview
 
 ## Deployment
 
-The app is hosted on **GitHub Pages** at [collins.lol](https://collins.lol).
+The app is hosted on **GitHub Pages** at [quiz.collins.lol](https://quiz.collins.lol).
 
 Deployment is **automatic** — any push or merged PR to the `main` branch triggers the GitHub Actions workflow at `.github/workflows/deploy.yml`, which:
 
 1. Installs dependencies
 2. Runs `npm run build`
-3. Injects a `CNAME` file (`collins.lol`) into the build output
+3. Injects a `CNAME` file (`quiz.collins.lol`) into the build output
 4. Publishes the `dist/` folder to the `gh-pages` branch via [`peaceiris/actions-gh-pages`](https://github.com/peaceiris/actions-gh-pages)
 
 GitHub Pages is then configured to serve from the `gh-pages` branch, with the custom domain pointing to it.
